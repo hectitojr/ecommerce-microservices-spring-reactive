@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: product-service
+
+  r2dbc:
+    url: r2dbc:h2:file:///D:/PROYECTOS/PRUEBA_TECNICA_IDM/proyecto/product-service/data/productdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    root: INFO
+    com.company.product: DEBUG

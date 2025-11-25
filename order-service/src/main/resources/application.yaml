@@ -1,0 +1,23 @@
+server:
+  port: 8082
+
+product-service:
+  base-url: http://localhost:8081
+
+spring:
+  application:
+    name: order-service
+
+  r2dbc:
+    url: r2dbc:h2:file:///D:/PROYECTOS/PRUEBA_TECNICA_IDM/proyecto/order-service/data/orderdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    root: INFO
+    com.company.order: DEBUG
