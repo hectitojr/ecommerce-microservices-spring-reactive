@@ -1,80 +1,244 @@
-\# Prueba técnica – Microservicios Productos y Ordenes
+Prueba Técnica – Microservicios de Productos y Órdenes
+
+Java 17 • Spring Boot WebFlux 4.0.0 • R2DBC • H2 • WebClient • WireMock
+
+Este proyecto implementa una arquitectura basada en microservicios para la gestión de productos y órdenes de compra.
+Fue desarrollado como parte de una prueba técnica, priorizando diseño limpio, reactividad, buena comunicación entre servicios, y pruebas automatizadas.
+
+Arquitectura General
+
+La solución está compuesta por dos microservicios independientes:
+
+1. product-service
+
+Responsable del catálogo de productos.
+
+Funcionalidades:
+
+Crear productos
+
+Listar productos activos
+
+Consultar producto por ID
+
+Modificar producto
+
+Validar disponibilidad de stock
+
+Descontar stock
+
+2. order-service
+
+Orquestador de creación de órdenes.
+
+Funcionalidades:
+
+Validar solicitud de orden
+
+Consultar disponibilidad de producto en product-service
+
+Descontar stock de forma transaccional via WebClient
+
+Calcular total
+
+Persistir orden
+
+Consultar orden por ID
+
+Listar órdenes
+
+Comunicación entre Microservicios
+
+Ambos servicios se comunican mediante REST reactivo usando WebClient.
+
+order-service  --->  GET /products/{id}/availability
+order-service  --->  PATCH /products/{id}/stock/decrease
+
+Tecnologías Utilizadas:
+Backend	Java 17, Spring Boot 4.0.0
+Web	Spring WebFlux (reactivo)
+BD	H2 (modo archivo), R2DBC
+Pruebas	JUnit 5, WebTestClient, Mockito, WireMock
+Build	Maven
+Logs	SLF4J + Logback
+
+Endpoints Principales
+
+product-service:
+
+Crear producto
+
+POST /products
+
+Listar productos activos
+
+GET /products
+
+Consultar por ID
+
+GET /products/{id}
+
+Actualizar producto
+
+PUT /products/{id}
+
+Validar disponibilidad (uso para order-service)
+
+GET /products/{id}/availability?qty=2
+
+Respuesta: true / false
+
+GET /products/{id}/availability/details?qty=2
+
+endpoint detallado de disponibilidad de stock
+
+Ejemplo si hay stock:
+
+{
+"productId": 1,
+"name": "Laptop Gamer",
+"requestedQty": 2,
+"currentStock": 12,
+"available": true,
+"message": "Existen 12 unidades disponibles en stock."
+}
 
 
 
-Este proyecto implementa una solución basada en microservicios para gestionar productos y órdenes de compra, usando Spring Boot WebFlux y acceso reactivo a base de datos con R2DBC + H2.
+Ejemplo si NO hay suficiente stock:
+
+{
+"productId": 1,
+"name": "Laptop Gamer",
+"requestedQty": 5,
+"currentStock": 3,
+"available": false,
+"message": "No hay stock suficiente del producto para la cantidad solicitada. Stock actual: 3"
+}
 
 
 
-El enfoque está pensado como una prueba técnica, pero siguiendo buenas prácticas de diseño, pruebas automatizadas e integración entre servicios.
+Ejemplo si stock = 0:
+
+{
+"productId": 1,
+"name": "Laptop Gamer",
+"requestedQty": 1,
+"currentStock": 0,
+"available": false,
+"message": "No hay stock del producto."
+}
+
+order-service
+
+Crear orden
+
+POST /orders
+
+Ejemplo de request:
+
+{
+"productId": 1,
+"quantity": 2
+}
+
+Consultar orden
+
+GET /orders/{id}
+
+Listar órdenes
+
+GET /orders
+
+Flujo de negocio de creación de órdenes
+
+El cliente solicita crear una orden.
+
+order-service valida parámetros.
+
+Consulta en product-service la disponibilidad:
+
+GET /products/{id}/availability?qty=x
 
 
 
----
+Si no hay stock → BadRequestException (NO se crea orden).
+
+Si hay stock → order-service solicita descuento:
+
+PATCH /products/{id}/stock/decrease?qty=x
 
 
 
-\## Arquitectura general
+product-service actualiza stock.
+
+order-service crea la orden en BD con estado CREATED.
+
+Testing
+Pruebas unitarias:
+
+Validación de reglas de negocio
+
+Validaciones de parámetros
+
+Calculo de total
+
+Pruebas de integración:
+
+WebClient + WireMock (simulación del product-service)
+
+WebTestClient para endpoints REST
+
+Ejecución del proyecto:
+
+1. Levantar product-service
+   mvn spring-boot:run
 
 
 
-El sistema está compuesto por dos microservicios:
+Puerto por defecto: 8081
+
+2. Levantar order-service
+   mvn spring-boot:run
 
 
 
-\- `product-service`  
-
-&nbsp; - Gestiona el catálogo de productos.
-
-&nbsp; - Expone endpoints para crear, listar y consultar productos.
-
-&nbsp; - Persiste datos en una base de datos H2 (R2DBC).
+Puerto por defecto: 8082
 
 
 
-\- `order-service`  
+Colecciones de Postman
 
-&nbsp; - Gestiona la creación de órdenes de compra.
-
-&nbsp; - Valida el stock del producto consultando `product-service`.
-
-&nbsp; - Calcula el total de la orden.
-
-&nbsp; - Persiste datos en una base de datos H2 (R2DBC).
-
-&nbsp; - Incluye pruebas de integración utilizando WebTestClient y WireMock para simular el `product-service`.
+Las colecciones utilizadas para probar los microservicios se encuentran en el directorio:
 
 
 
-La comunicación entre microservicios es vía HTTP (REST) y se realiza de forma reactiva usando WebClient.
+/Postman
 
 
 
----
+Incluyen:
 
 
 
-\## Tecnologías utilizadas
+La colección completa de endpoints
 
 
 
-\- Java 17 
+Folders para cada microservicio
 
-\- Spring Boot 4.0.0  
 
-&nbsp; - Spring WebFlux  
 
-&nbsp; - Spring Data R2DBC  
+Ejemplos de solicitudes y respuestas
 
-\- H2 (base de datos embebida, modo archivo)
 
-\- R2DBC para acceso reactivo a la base de datos
 
-\- JUnit 5 para testing
+Estas colecciones pueden importarse directamente en Postman para facilitar las pruebas.
 
-\- Spring WebTestClient para pruebas de integración
 
-\- WireMock para simular el `product-service` en las pruebas del `order-service`
 
-\- Maven para la gestión de dependencias y build
+Autor
+
+Ronald Urbano Miguel Chinchay Zelada
+Backend Java / Arquitectura de Microservicios / Spring WebFlux
 

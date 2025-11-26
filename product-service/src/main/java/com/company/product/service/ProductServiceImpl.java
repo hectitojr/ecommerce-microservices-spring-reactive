@@ -1,6 +1,7 @@
 package com.company.product.service;
 
 import com.company.product.dto.CreateProductRequest;
+import com.company.product.dto.ProductAvailabilityResponse;
 import com.company.product.dto.UpdateProductRequest;
 import com.company.product.exception.BadRequestException;
 import com.company.product.exception.NotFoundException;
@@ -80,6 +81,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Mono<Boolean> checkAvailability(Long id, Integer qty) {
+        return checkAvailabilityDetails(id, qty)
+                .map(ProductAvailabilityResponse::available);
+    }
+
+    @Override
+    public Mono<ProductAvailabilityResponse> checkAvailabilityDetails(Long id, Integer qty) {
         return Mono.justOrEmpty(qty)
                 .filter(q -> q > 0)
                 .switchIfEmpty(Mono.error(
@@ -87,12 +94,34 @@ public class ProductServiceImpl implements ProductService {
                 ))
                 .zipWith(findById(id))
                 .map(tuple -> {
-                    Integer q = tuple.getT1();
+                    Integer requestedQty = tuple.getT1();
                     Product p = tuple.getT2();
-                    boolean available = p.stock() >= q && Boolean.TRUE.equals(p.active());
-                    log.debug("Verificando disponibilidad producto id={}, requestedQty={}, stock={}, active={}, available={}",
-                            p.id(), q, p.stock(), p.active(), available);
-                    return available;
+
+                    boolean available = p.stock() >= requestedQty && Boolean.TRUE.equals(p.active());
+
+                    String message;
+                    if (p.stock() == 0) {
+                        message = "No hay stock del producto.";
+                    } else if (!available) {
+                        message = "No hay stock suficiente del producto para la cantidad solicitada. " +
+                                "Stock actual: " + p.stock();
+                    } else {
+                        message = "Existen " + p.stock() + " unidades disponibles en stock.";
+                    }
+
+                    log.info(
+                            "Disponibilidad consultada (detalle) - productId={}, name={}, requestedQty={}, currentStock={}, active={}, available={}, message={}",
+                            p.id(), p.name(), requestedQty, p.stock(), p.active(), available, message
+                    );
+
+                    return new ProductAvailabilityResponse(
+                            p.id(),
+                            p.name(),
+                            requestedQty,
+                            p.stock(),
+                            available,
+                            message
+                    );
                 });
     }
 

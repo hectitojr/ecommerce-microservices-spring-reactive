@@ -1,6 +1,7 @@
 package com.company.product.controller;
 
 import com.company.product.dto.CreateProductRequest;
+import com.company.product.dto.ProductAvailabilityResponse;
 import com.company.product.dto.UpdateProductRequest;
 import com.company.product.model.Product;
 import com.company.product.service.ProductService;
@@ -53,6 +54,16 @@ public class ProductController {
             Integer qty
     ) {
         return service.checkAvailability(id, qty);
+    }
+
+    @GetMapping("/{id}/availability/details")
+    public Mono<ProductAvailabilityResponse> availabilityDetails(
+            @PathVariable Long id,
+            @RequestParam
+            @Min(value = 1, message = "La cantidad mínima solicitada debe ser 1.")
+            Integer qty
+    ) {
+        return service.checkAvailabilityDetails(id, qty);
     }
 
     @PatchMapping("/{id}/stock/decrease")

@@ -47,14 +47,9 @@ public class OrderServiceImpl implements OrderService {
                 .flatMap(available -> {
                     if (!available) {
                         log.warn("Stock insuficiente para productId={}, requestedQty={}", productId, qty);
-                        Order rejected = new Order(
-                                null,
-                                productId,
-                                qty,
-                                0.0,
-                                OrderStatus.REJECTED
-                        );
-                        return repo.save(rejected);
+                        return Mono.error(new BadRequestException(
+                                "No hay stock suficiente para completar la orden."
+                        ));
                     }
 
                     return productClient.decreaseStock(productId, qty)
