@@ -9,7 +9,7 @@ Fue desarrollado como parte de una prueba técnica, priorizando:
 - ⚡ Programación reactiva (Spring WebFlux + R2DBC)  
 - 🔁 Comunicación robusta entre microservicios  
 - 🧪 Buen nivel de pruebas automatizadas (unitarias e integración)
-_______________________________________________________________________________________________
+_____________________________________________________________________
 🏗️ Arquitectura General
 
 La solución está compuesta por dos microservicios independientes:
@@ -40,7 +40,7 @@ Actúa como **orquestador** del proceso de creación de órdenes.
 - 💾 Persistir la orden en BD  
 - 🔍 Consultar orden por **ID**  
 - 📃 Listar todas las órdenes
-_______________________________________________________________________________________________
+_____________________________________________________________________
 ## 📡 Comunicación entre Microservicios
 
 La comunicación entre servicios se realiza vía **REST reactivo** usando `WebClient`:
@@ -51,7 +51,7 @@ GET  /products/{id}/availability?qty=x
 PATCH /products/{id}/stock/decrease?qty=x
 
 Toda la comunicación es no bloqueante, alineada con Spring WebFlux.
-_______________________________________________________________________________________________
+_____________________________________________________________________
 ⚙️ Tecnologías Utilizadas
 🖥️ Backend
 
@@ -86,7 +86,7 @@ ________________________________________________________________________________
 🧰 Maven
 
 📜 SLF4J + Logback (logging estructurado)
-_______________________________________________________________________________________________
+_____________________________________________________________________
 🌐 Endpoints Principales
 🧩 product-service
 ➕ Crear producto
@@ -98,15 +98,15 @@ POST /products
   "price": 1500.0,
   "stock": 10
 }
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 📃 Listar productos activos
 
 GET /products
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 🔍 Consultar producto por ID
 
 GET /products/{id}
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 ✏️ Actualizar producto
 
 PUT /products/{id}
@@ -117,12 +117,12 @@ PUT /products/{id}
   "stock": 8,
   "active": true
 }
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 ✅ Validar disponibilidad (usado por order-service)
 
 GET /products/{id}/availability?qty=2
 📥 Respuesta: true / false
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 🔍 Detalle de disponibilidad
 
 GET /products/{id}/availability/details?qty=2
@@ -159,7 +159,7 @@ Ejemplo – stock agotado (currentStock = 0):
   "available": false,
   "message": "No hay stock del producto."
 }
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 📦 order-service
 🧾 Crear orden
 
@@ -171,15 +171,15 @@ Ejemplo de request:
   "productId": 1,
   "quantity": 2
 }
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 🔍 Consultar orden por ID
 
 GET /orders/{id}
-`_______________________________________________________________________________________________`
+`_____________________________________________________________________`
 📃 Listar órdenes
 
 GET /orders
-_______________________________________________________________________________________________
+_____________________________________________________________________
 🔁 Flujo de Negocio: Creación de Orden
 
 👤 El cliente envía una solicitud de creación de orden:
@@ -211,7 +211,7 @@ product-service actualiza el stock y devuelve el producto actualizado (con su pr
 💰 order-service calcula el total: precio * cantidad.
 
 💾 Se persiste la orden en la BD con estado CREATED.
-_______________________________________________________________________________________________
+_____________________________________________________________________
 🧪 Testing
 ✅ Pruebas Unitarias
 
@@ -238,7 +238,7 @@ Mockito (mocks de repositorios y clientes HTTP)
 StepVerifier (verificación de flujos Mono/Flux)
 
 AssertJ para assertions expresivas
-_______________________________________________________________________________________________
+_____________________________________________________________________
 🔗 Pruebas de Integración
 
 🌐 WebTestClient para probar endpoints REST de forma reactiva.
@@ -254,21 +254,21 @@ Errores 4xx / 5xx desde el servicio externo
 Flujo completo order-service → product-service → BD H2
 
 Contratos HTTP (estatus, body, manejo de errores)
-_______________________________________________________________________________________________
+_____________________________________________________________________
 ▶️ Ejecución del Proyecto
 🧩 Levantar product-service
 cd product-service
 mvn spring-boot:run
 
 🔌 Puerto por defecto: 8081
-_______________________________________________________________________________________________
+_____________________________________________________________________
 📦 Levantar order-service
 cd order-service
 mvn spring-boot:run
 
 
 🔌 Puerto por defecto: 8082
-_______________________________________________________________________________________________
+_____________________________________________________________________
 🧰 Colecciones de Postman
 
 Las colecciones utilizadas para probar los microservicios se encuentran en el directorio:
@@ -284,7 +284,7 @@ Incluyen:
 📄 Ejemplos de solicitudes y respuestas listas para usar
 
 Pueden importarse directamente en Postman para facilitar las pruebas manuales.
-_______________________________________________________________________________________________
+_____________________________________________________________________
 👨‍💻 Autor
 
 Ronald Urbano Miguel Chinchay Zelada
