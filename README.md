@@ -98,14 +98,17 @@ POST /products
   "price": 1500.0,
   "stock": 10
 }
+
 `_____________________________________________________________________`
 📃 Listar productos activos
 
 GET /products
+
 `_____________________________________________________________________`
 🔍 Consultar producto por ID
 
 GET /products/{id}
+
 `_____________________________________________________________________`
 ✏️ Actualizar producto
 
@@ -117,11 +120,13 @@ PUT /products/{id}
   "stock": 8,
   "active": true
 }
+
 `_____________________________________________________________________`
 ✅ Validar disponibilidad (usado por order-service)
 
 GET /products/{id}/availability?qty=2
 📥 Respuesta: true / false
+
 `_____________________________________________________________________`
 🔍 Detalle de disponibilidad
 
@@ -159,6 +164,7 @@ Ejemplo – stock agotado (currentStock = 0):
   "available": false,
   "message": "No hay stock del producto."
 }
+
 `_____________________________________________________________________`
 📦 order-service
 🧾 Crear orden
@@ -171,14 +177,17 @@ Ejemplo de request:
   "productId": 1,
   "quantity": 2
 }
+
 `_____________________________________________________________________`
 🔍 Consultar orden por ID
 
 GET /orders/{id}
+
 `_____________________________________________________________________`
 📃 Listar órdenes
 
 GET /orders
+
 _____________________________________________________________________
 🔁 Flujo de Negocio: Creación de Orden
 
