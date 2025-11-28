@@ -1,244 +1,291 @@
-Prueba Técnica – Microservicios de Productos y Órdenes
+🧪 Prueba Técnica – Microservicios de Productos y Órdenes
 
-Java 17 • Spring Boot WebFlux 4.0.0 • R2DBC • H2 • WebClient • WireMock
+Stack: Java 17 • Spring Boot 4.0.0 (WebFlux) • R2DBC • H2 (file) • WebClient • WireMock • Maven
 
-Este proyecto implementa una arquitectura basada en microservicios para la gestión de productos y órdenes de compra.
-Fue desarrollado como parte de una prueba técnica, priorizando diseño limpio, reactividad, buena comunicación entre servicios, y pruebas automatizadas.
+Este proyecto implementa una arquitectura basada en microservicios para la gestión de productos y órdenes de compra.  
+Fue desarrollado como parte de una prueba técnica, priorizando:
 
-Arquitectura General
+- ✅ Diseño limpio y capas bien separadas  
+- ⚡ Programación reactiva (Spring WebFlux + R2DBC)  
+- 🔁 Comunicación robusta entre microservicios  
+- 🧪 Buen nivel de pruebas automatizadas (unitarias e integración)
+_______________________________________________________________________________________________
+🏗️ Arquitectura General
 
 La solución está compuesta por dos microservicios independientes:
 
-1. product-service
+### 🧩 `product-service` (Catálogo de productos)
 
-Responsable del catálogo de productos.
+Responsable de la gestión del catálogo y el control de stock.
 
-Funcionalidades:
+**Funcionalidades principales:**
 
-Crear productos
+- ➕ Crear productos  
+- 📃 Listar productos **activos**  
+- 🔍 Consultar producto por **ID**  
+- ✏️ Modificar producto  
+- ✅ Validar **disponibilidad de stock**  
+- ➖ Descontar stock
 
-Listar productos activos
+### 📦 `order-service` (Órdenes de compra)
 
-Consultar producto por ID
+Actúa como **orquestador** del proceso de creación de órdenes.
 
-Modificar producto
+**Funcionalidades principales:**
 
-Validar disponibilidad de stock
+- ✅ Validar la solicitud de orden (parámetros y reglas de negocio)  
+- 🔗 Consultar disponibilidad del producto en `product-service`  
+- 🔁 Descontar stock en `product-service` vía **WebClient**  
+- 💰 Calcular el total de la orden  
+- 💾 Persistir la orden en BD  
+- 🔍 Consultar orden por **ID**  
+- 📃 Listar todas las órdenes
+_______________________________________________________________________________________________
+## 📡 Comunicación entre Microservicios
 
-Descontar stock
+La comunicación entre servicios se realiza vía **REST reactivo** usando `WebClient`:
 
-2. order-service
+- `order-service` → `product-service`
+  
+GET  /products/{id}/availability?qty=x
+PATCH /products/{id}/stock/decrease?qty=x
 
-Orquestador de creación de órdenes.
+Toda la comunicación es no bloqueante, alineada con Spring WebFlux.
+_______________________________________________________________________________________________
+⚙️ Tecnologías Utilizadas
+🖥️ Backend
 
-Funcionalidades:
+☕ Java 17
 
-Validar solicitud de orden
+🚀 Spring Boot 4.0.0
 
-Consultar disponibilidad de producto en product-service
+⚡ Spring WebFlux (endpoints y flujos reactivos)
 
-Descontar stock de forma transaccional via WebClient
+🗄️ H2 Database en modo archivo
 
-Calcular total
+🔄 R2DBC (acceso a datos reactivo)
 
-Persistir orden
+🔌 Comunicación HTTP
 
-Consultar orden por ID
+🌐 WebClient (cliente HTTP reactivo)
 
-Listar órdenes
+🧪 Testing
 
-Comunicación entre Microservicios
+🧱 JUnit 5
 
-Ambos servicios se comunican mediante REST reactivo usando WebClient.
+🌊 Reactor Test (StepVerifier)
 
-order-service  --->  GET /products/{id}/availability
-order-service  --->  PATCH /products/{id}/stock/decrease
+🌐 WebTestClient (pruebas de endpoints WebFlux)
 
-Tecnologías Utilizadas:
-Backend	Java 17, Spring Boot 4.0.0
-Web	Spring WebFlux (reactivo)
-BD	H2 (modo archivo), R2DBC
-Pruebas	JUnit 5, WebTestClient, Mockito, WireMock
-Build	Maven
-Logs	SLF4J + Logback
+🎭 Mockito (mocks de servicios/repositorios)
 
-Endpoints Principales
+🎯 WireMock (simulación de product-service en pruebas de integración)
 
-product-service:
+🔨 Build & Logging
 
-Crear producto
+🧰 Maven
+
+📜 SLF4J + Logback (logging estructurado)
+_______________________________________________________________________________________________
+🌐 Endpoints Principales
+🧩 product-service
+➕ Crear producto
 
 POST /products
 
-Listar productos activos
+{
+  "name": "Laptop",
+  "price": 1500.0,
+  "stock": 10
+}
+`_______________________________________________________________________________________________`
+📃 Listar productos activos
 
 GET /products
-
-Consultar por ID
+`_______________________________________________________________________________________________`
+🔍 Consultar producto por ID
 
 GET /products/{id}
-
-Actualizar producto
+`_______________________________________________________________________________________________`
+✏️ Actualizar producto
 
 PUT /products/{id}
 
-Validar disponibilidad (uso para order-service)
+{
+  "name": "Laptop Gamer",
+  "price": 2000.0,
+  "stock": 8,
+  "active": true
+}
+`_______________________________________________________________________________________________`
+✅ Validar disponibilidad (usado por order-service)
 
 GET /products/{id}/availability?qty=2
-
-Respuesta: true / false
+📥 Respuesta: true / false
+`_______________________________________________________________________________________________`
+🔍 Detalle de disponibilidad
 
 GET /products/{id}/availability/details?qty=2
 
-endpoint detallado de disponibilidad de stock
-
-Ejemplo si hay stock:
+Ejemplo – hay stock suficiente:
 
 {
-"productId": 1,
-"name": "Laptop Gamer",
-"requestedQty": 2,
-"currentStock": 12,
-"available": true,
-"message": "Existen 12 unidades disponibles en stock."
+  "productId": 1,
+  "name": "Laptop Gamer",
+  "requestedQty": 2,
+  "currentStock": 12,
+  "available": true,
+  "message": "Existen 12 unidades disponibles en stock."
 }
 
-
-
-Ejemplo si NO hay suficiente stock:
+Ejemplo – NO hay stock suficiente:
 
 {
-"productId": 1,
-"name": "Laptop Gamer",
-"requestedQty": 5,
-"currentStock": 3,
-"available": false,
-"message": "No hay stock suficiente del producto para la cantidad solicitada. Stock actual: 3"
+  "productId": 1,
+  "name": "Laptop Gamer",
+  "requestedQty": 5,
+  "currentStock": 3,
+  "available": false,
+  "message": "No hay stock suficiente del producto para la cantidad solicitada. Stock actual: 3"
 }
 
-
-
-Ejemplo si stock = 0:
+Ejemplo – stock agotado (currentStock = 0):
 
 {
-"productId": 1,
-"name": "Laptop Gamer",
-"requestedQty": 1,
-"currentStock": 0,
-"available": false,
-"message": "No hay stock del producto."
+  "productId": 1,
+  "name": "Laptop Gamer",
+  "requestedQty": 1,
+  "currentStock": 0,
+  "available": false,
+  "message": "No hay stock del producto."
 }
-
-order-service
-
-Crear orden
+`_______________________________________________________________________________________________`
+📦 order-service
+🧾 Crear orden
 
 POST /orders
 
 Ejemplo de request:
 
 {
-"productId": 1,
-"quantity": 2
+  "productId": 1,
+  "quantity": 2
 }
-
-Consultar orden
+`_______________________________________________________________________________________________`
+🔍 Consultar orden por ID
 
 GET /orders/{id}
-
-Listar órdenes
+`_______________________________________________________________________________________________`
+📃 Listar órdenes
 
 GET /orders
+_______________________________________________________________________________________________
+🔁 Flujo de Negocio: Creación de Orden
 
-Flujo de negocio de creación de órdenes
+👤 El cliente envía una solicitud de creación de orden:
 
-El cliente solicita crear una orden.
+POST /orders con { productId, quantity }.
 
-order-service valida parámetros.
+🧩 order-service:
 
-Consulta en product-service la disponibilidad:
+Valida parámetros (id > 0, quantity > 0).
+
+Llama a product-service para validar stock:
 
 GET /products/{id}/availability?qty=x
 
+📦 Si no hay stock suficiente:
 
+Se lanza una BadRequestException a nivel de order-service.
 
-Si no hay stock → BadRequestException (NO se crea orden).
+La orden no se crea / o se maneja como REJECTED según la lógica de negocio configurada.
 
-Si hay stock → order-service solicita descuento:
+📦 Si hay stock suficiente:
+
+order-service solicita descontar stock:
 
 PATCH /products/{id}/stock/decrease?qty=x
 
+product-service actualiza el stock y devuelve el producto actualizado (con su precio).
+
+💰 order-service calcula el total: precio * cantidad.
+
+💾 Se persiste la orden en la BD con estado CREATED.
+_______________________________________________________________________________________________
+🧪 Testing
+✅ Pruebas Unitarias
+
+✔️ Validación de reglas de negocio:
+
+Cantidad > 0
+
+ID de producto > 0
+
+Manejo de stock y estado activo/inactivo
+
+✔️ Cálculo de total en order-service
+
+✔️ Validación de estados de orden (CREATED, REJECTED)
+
+✔️ Manejo de excepciones de dominio (BadRequestException, NotFoundException, BusinessException, ExternalServiceException)
+
+Herramientas usadas:
+
+JUnit 5
+
+Mockito (mocks de repositorios y clientes HTTP)
+
+StepVerifier (verificación de flujos Mono/Flux)
+
+AssertJ para assertions expresivas
+_______________________________________________________________________________________________
+🔗 Pruebas de Integración
+
+🌐 WebTestClient para probar endpoints REST de forma reactiva.
+
+🎯 WireMock para simular product-service en escenarios como:
+
+Stock disponible / no disponible
+
+Errores 4xx / 5xx desde el servicio externo
+
+🔄 Validación de:
+
+Flujo completo order-service → product-service → BD H2
+
+Contratos HTTP (estatus, body, manejo de errores)
+_______________________________________________________________________________________________
+▶️ Ejecución del Proyecto
+🧩 Levantar product-service
+cd product-service
+mvn spring-boot:run
+
+🔌 Puerto por defecto: 8081
+_______________________________________________________________________________________________
+📦 Levantar order-service
+cd order-service
+mvn spring-boot:run
 
 
-product-service actualiza stock.
-
-order-service crea la orden en BD con estado CREATED.
-
-Testing
-Pruebas unitarias:
-
-Validación de reglas de negocio
-
-Validaciones de parámetros
-
-Calculo de total
-
-Pruebas de integración:
-
-WebClient + WireMock (simulación del product-service)
-
-WebTestClient para endpoints REST
-
-Ejecución del proyecto:
-
-1. Levantar product-service
-   mvn spring-boot:run
-
-
-
-Puerto por defecto: 8081
-
-2. Levantar order-service
-   mvn spring-boot:run
-
-
-
-Puerto por defecto: 8082
-
-
-
-Colecciones de Postman
+🔌 Puerto por defecto: 8082
+_______________________________________________________________________________________________
+🧰 Colecciones de Postman
 
 Las colecciones utilizadas para probar los microservicios se encuentran en el directorio:
 
-
-
 /Postman
-
-
 
 Incluyen:
 
+📂 Colección completa de endpoints
 
+📁 Folders para cada microservicio (product-service, order-service)
 
-La colección completa de endpoints
+📄 Ejemplos de solicitudes y respuestas listas para usar
 
-
-
-Folders para cada microservicio
-
-
-
-Ejemplos de solicitudes y respuestas
-
-
-
-Estas colecciones pueden importarse directamente en Postman para facilitar las pruebas.
-
-
-
-Autor
+Pueden importarse directamente en Postman para facilitar las pruebas manuales.
+_______________________________________________________________________________________________
+👨‍💻 Autor
 
 Ronald Urbano Miguel Chinchay Zelada
-Backend Java / Arquitectura de Microservicios / Spring WebFlux
-
+Backend Java • Arquitectura de Microservicios • Spring WebFlux
